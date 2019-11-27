@@ -1,5 +1,5 @@
 from src import dataset
-from src.mlp import FraudDetectionMLP
+from src.ensemble import FraudDetectionEnsemble
 import numpy as np
 import math
 from tensorflow import keras
@@ -19,19 +19,13 @@ def main():
     x_train, y_train = x[:-split], y[:-split]
     x_test, y_test = x[-split:], y[-split:]
 
-    model = FraudDetectionMLP()
+    model = FraudDetectionEnsemble(1)
     model.compile(optimizer=keras.optimizers.Adam(), loss="mean_squared_error", metrics=[keras.metrics.binary_accuracy])
 
-    print('Training model...')
-    checkpoint = 'res/model.hdf5'
-    callbacks = [
-        keras.callbacks.EarlyStopping(patience=5),
-        keras.callbacks.ModelCheckpoint(checkpoint, save_best_only=True),
-    ]
-    model.fit(x_train, y_train, batch_size=128, validation_split=0.2, epochs=32, callbacks=callbacks)
+    print('Training ensemble...')
+    model.fit(x_train, y_train, batch_size=256, validation_split=0.2, epochs=32)
 
-    print('Evaluating best model...')
-    model.load_weights(checkpoint)
+    print('Evaluating ensemble...')
     model.evaluate(x_test, y_test)
 
 
